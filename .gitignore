@@ -1,0 +1,10 @@
+/db-config.php
+/bp-api-config.php
+/storage/*
+!/storage/.htaccess
+.env
+.env.*
+!.env.example
+*.log
+Thumbs.db
+desktop.ini
