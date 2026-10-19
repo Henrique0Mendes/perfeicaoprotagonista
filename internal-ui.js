@@ -28,8 +28,6 @@
   ];
   if (isDriver) items = [
     ['Início', 'driver.php', 'home'],
-    ['As minhas rotas', 'driver.php#driver-rotas', 'route'],
-    ['Jornadas', 'driver.php#driver-historico', 'logs'],
     ['Registar jornada', 'driver.php#driver-registo', 'plus'],
     ['Registar abastecimento', 'driver.php#driver-abastecimentos', 'fuel']
   ];
@@ -61,6 +59,37 @@
   }
 
   if (isDriver) {
+    const profileTrigger = header.querySelector('.driver-avatar-open');
+    const profileDialog = document.getElementById('driver-profile-dialog');
+    const clearProfilePasswords = () => profileDialog?.querySelectorAll('input[type="password"]').forEach((input) => { input.value = ''; });
+    profileTrigger?.addEventListener('click', () => {
+      if (profileDialog instanceof HTMLDialogElement && !profileDialog.open) {
+        clearProfilePasswords();
+        profileDialog.showModal();
+      }
+    });
+    profileDialog?.querySelector('#driver-profile-photo')?.addEventListener('change', (event) => {
+      const input = event.currentTarget;
+      const label = profileDialog.querySelector('.driver-photo-copy small');
+      if (label && input instanceof HTMLInputElement) {
+        const file = input.files?.[0];
+        label.textContent = file?.name || 'JPG, PNG ou WebP · máximo 8 MB';
+        if (file) {
+          let preview = profileDialog.querySelector('.driver-profile-preview');
+          if (!(preview instanceof HTMLImageElement)) {
+            const image = document.createElement('img');
+            image.className = 'driver-profile-preview';
+            image.alt = 'Pré-visualização da nova foto';
+            preview?.replaceWith(image);
+            preview = image;
+          }
+          if (preview.dataset.previewUrl) URL.revokeObjectURL(preview.dataset.previewUrl);
+          preview.dataset.previewUrl = URL.createObjectURL(file);
+          preview.src = preview.dataset.previewUrl;
+        }
+      }
+    });
+
     document.querySelectorAll('.app-navigation a[href*="#driver-registo"],.app-navigation a[href*="#driver-abastecimentos"],.driver-shortcuts a[href*="#driver-registo"],.driver-shortcuts a[href*="#driver-abastecimentos"]').forEach((link) => {
       link.setAttribute('aria-haspopup', 'dialog');
       link.addEventListener('click', (event) => {
@@ -80,12 +109,14 @@
       closeButton.textContent = '×';
       dialog.querySelector('.panel-heading')?.appendChild(closeButton);
       closeButton.addEventListener('click', () => dialog.close());
+      dialog.querySelectorAll('[data-dialog-close]').forEach((button) => button.addEventListener('click', () => dialog.close()));
       dialog.addEventListener('click', (event) => {
         if (event.target === dialog) dialog.close();
       });
       if (dialog.dataset.reopen === 'true') {
         const errorNotice = main.querySelector('.notice.error');
         if (errorNotice) dialog.prepend(errorNotice.cloneNode(true));
+        if (dialog === profileDialog) clearProfilePasswords();
         dialog.showModal();
       }
     });

@@ -50,6 +50,30 @@ function ensure_journey_pda_photo_schema(PDO $pdo): void
     $checked = true;
 }
 
+function ensure_journey_counts_schema(PDO $pdo): void
+{
+    static $checked = false;
+    if ($checked) return;
+    $columns = [
+        'incidents_count' => 'ALTER TABLE journeys ADD COLUMN incidents_count INT UNSIGNED NOT NULL DEFAULT 0 AFTER deliveries_count',
+        'pickups_count' => 'ALTER TABLE journeys ADD COLUMN pickups_count INT UNSIGNED NOT NULL DEFAULT 0 AFTER incidents_count',
+    ];
+    foreach ($columns as $name => $sql) {
+        $column = $pdo->query("SHOW COLUMNS FROM journeys LIKE '{$name}'")->fetch();
+        if (!$column) $pdo->exec($sql);
+    }
+    $checked = true;
+}
+
+function ensure_user_theme_schema(PDO $pdo): void
+{
+    static $checked = false;
+    if ($checked) return;
+    $column = $pdo->query("SHOW COLUMNS FROM users LIKE 'theme'")->fetch();
+    if (!$column) $pdo->exec("ALTER TABLE users ADD COLUMN theme ENUM('light','dark') NOT NULL DEFAULT 'light' AFTER role");
+    $checked = true;
+}
+
 function ensure_fuel_records_schema(PDO $pdo): void
 {
     static $checked = false;
@@ -133,6 +157,11 @@ function verify_csrf(): void
 function current_user(): ?array
 {
     return $_SESSION['user'] ?? null;
+}
+
+function app_theme(): string
+{
+    return ($_SESSION['user']['theme'] ?? 'light') === 'dark' ? 'dark' : 'light';
 }
 
 function user_is_admin(array $user): bool

@@ -14,4 +14,5 @@ $adminNavigation = [
     <a href="<?= e($href) ?>" class="<?= $isCurrent ? 'is-active' : '' ?>"<?= $isCurrent ? ' aria-current="page"' : '' ?>><svg viewBox="0 0 24 24" aria-hidden="true"><?= $iconPath ?></svg><b><?= e($label) ?></b></a>
   <?php endforeach; ?>
   <?php if (isset($user) && user_is_driver($user)): ?><a href="driver.php"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><b>Área do condutor</b></a><?php endif; ?>
+  <?php require __DIR__ . '/theme-toggle.php'; ?>
 </nav>

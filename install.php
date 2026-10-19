@@ -10,8 +10,10 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS users (
     profile_photo VARCHAR(255) NULL,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('admin','driver','both') NOT NULL DEFAULT 'driver',
+    theme ENUM('light','dark') NOT NULL DEFAULT 'light',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+ensure_user_theme_schema($pdo);
 $pdo->exec("CREATE TABLE IF NOT EXISTS vehicles (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     registration VARCHAR(20) NOT NULL UNIQUE,
@@ -131,6 +133,8 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS journeys (
     route_id BIGINT UNSIGNED NULL,
     odometer_km INT UNSIGNED NOT NULL,
     deliveries_count INT UNSIGNED NOT NULL DEFAULT 0,
+    incidents_count INT UNSIGNED NOT NULL DEFAULT 0,
+    pickups_count INT UNSIGNED NOT NULL DEFAULT 0,
     observations TEXT NULL,
     pda_photo VARCHAR(255) NULL,
     report_date DATE NOT NULL,
@@ -164,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
-?><!doctype html><html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Configurar acesso · Perfeição Protagonista</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="internal.css"></head><body class="app-body"><main class="auth-shell"><a class="brand" href="index.html"><span class="brand-mark app-brand-mark" aria-hidden="true"><svg class="brand-symbol" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><path class="brand-back" fill="#101820" fill-rule="evenodd" d="M13 8h48c33 0 51 17 51 44S94 96 61 96H44v20L13 87V8Zm31 28v32h17c14 0 21-5 21-16s-7-16-21-16H44Z"/><path class="brand-front" fill="#18884a" fill-rule="evenodd" d="M7 3h48c33 0 51 17 51 44S88 91 55 91H38v20L7 82V3Zm31 28v32h17c14 0 21-5 21-16s-7-16-21-16H38Z"/></svg></span><span>Perfeição<span class="brand-light"> Protagonista</span><small>TRANSPORTES & LOGÍSTICA</small></span></a><section class="auth-card"><span class="app-kicker">CONFIGURAÇÃO INICIAL</span><h1>Criar administrador</h1><p>Crie a primeira conta para começar a gerir a frota e as rotas.</p><?php if ($error): ?><div class="notice error"><?= e($error) ?></div><?php endif; ?><form method="post"><input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>"><label>Nome<input name="name" required autocomplete="name" value="<?= e($_POST['name'] ?? '') ?>"></label><label>Email<input name="email" type="email" required autocomplete="email" value="<?= e($_POST['email'] ?? '') ?>"></label><label>Palavra-passe <small>(mínimo 10 caracteres)</small><input name="password" type="password" required minlength="10" autocomplete="new-password"></label><button class="button button-lime full" type="submit">Criar administrador <span>↗</span></button></form><a class="auth-back" href="index.html">← Voltar ao site</a></section><p class="auth-foot">A configuração inicial fecha automaticamente depois de criar a primeira conta.</p></main></body></html>
+?><!doctype html><html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Configurar acesso · Perfeição Protagonista</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="internal.css?v=20261019-dark-theme-v11"><link rel="icon" type="image/svg+xml" href="favicon.svg?v=2"></head><body class="app-body"><main class="auth-shell"><a class="brand" href="index.html"><span class="brand-mark app-brand-mark" aria-hidden="true"><svg class="brand-symbol" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><path class="brand-back" fill="#101820" fill-rule="evenodd" d="M13 8h48c33 0 51 17 51 44S94 96 61 96H44v20L13 87V8Zm31 28v32h17c14 0 21-5 21-16s-7-16-21-16H44Z"/><path class="brand-front" fill="#18884a" fill-rule="evenodd" d="M7 3h48c33 0 51 17 51 44S88 91 55 91H38v20L7 82V3Zm31 28v32h17c14 0 21-5 21-16s-7-16-21-16H38Z"/></svg></span><span>Perfeição<span class="brand-light"> Protagonista</span><small>PUBLICIDADE & ENCOMENDAS</small></span></a><section class="auth-card"><span class="app-kicker">CONFIGURAÇÃO INICIAL</span><h1>Criar administrador</h1><p>Crie a primeira conta para começar a gerir a frota e as rotas.</p><?php if ($error): ?><div class="notice error"><?= e($error) ?></div><?php endif; ?><form method="post"><input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>"><label>Nome<input name="name" required autocomplete="name" value="<?= e($_POST['name'] ?? '') ?>"></label><label>Email<input name="email" type="email" required autocomplete="email" value="<?= e($_POST['email'] ?? '') ?>"></label><label>Palavra-passe <small>(mínimo 10 caracteres)</small><input name="password" type="password" required minlength="10" autocomplete="new-password"></label><button class="button button-lime full" type="submit">Criar administrador <span>↗</span></button></form><a class="auth-back" href="index.html">← Voltar ao site</a></section><p class="auth-foot">A configuração inicial fecha automaticamente depois de criar a primeira conta.</p></main></body></html>
 
 
 
