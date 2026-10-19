@@ -1,20 +1,27 @@
 const menuButton = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('.nav-links');
 
+const setMenuOpen = (isOpen) => {
+  navigation?.classList.toggle('open', isOpen);
+  menuButton?.setAttribute('aria-expanded', String(isOpen));
+  menuButton?.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+};
+
 menuButton?.addEventListener('click', () => {
-  const isOpen = navigation.classList.toggle('open');
-  menuButton.setAttribute('aria-expanded', String(isOpen));
-  menuButton.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+  setMenuOpen(!navigation?.classList.contains('open'));
 });
 
 navigation?.querySelectorAll('a').forEach((link) => {
-  link.addEventListener('click', () => {
-    navigation.classList.remove('open');
-    menuButton?.setAttribute('aria-expanded', 'false');
-  });
+  link.addEventListener('click', () => setMenuOpen(false));
 });
 
-document.querySelector('#year').textContent = new Date().getFullYear();
+document.querySelector('#year')?.replaceChildren(String(new Date().getFullYear()));
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && navigation?.classList.contains('open')) {
+    setMenuOpen(false);
+    menuButton?.focus();
+  }
+});
 
 // Motion and small interaction enhancements for the public homepage.
 const siteHeader = document.querySelector('.site-header');
@@ -36,7 +43,7 @@ const syncHeader = () => {
 syncHeader();
 window.addEventListener('scroll', syncHeader, { passive: true });
 
-const revealItems = document.querySelectorAll('.stats-strip, .section-heading, .service-card, .contact-card, footer');
+const revealItems = document.querySelectorAll('.stats-strip, .section-heading, .service-card, .process-step, .faq-item, .contact-card, footer');
 if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   const revealObserver = new IntersectionObserver((entries, observer) => {
     entries.forEach((entry) => {
